@@ -24,3 +24,8 @@ def readData():
 def saveData(data):
   with open('data.json', 'w') as outfile:
     json.dump(data, outfile)
+
+def readSchedule():
+  with open('schedule.json') as json_file:
+    return json.load(json_file)
+

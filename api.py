@@ -3,6 +3,7 @@ import itertools
 from datetime import datetime
 import constant
 import timeanddate
+from logging import Logger
 
 def doLogin(email: str, password: str) -> str:
     loginEndpoint = "check_login/"
@@ -37,10 +38,13 @@ def getClassId(token: str, date: datetime, time: datetime) -> str:
             x.get('orario_inizio'), constant.INPUT_TIME_FORMAT) != time, classes)
         return list(filteredClasses).pop().get('id_orario_palinsesto')
 
-def doReservation(classId: str, token: str, date: datetime) -> str:
+def doReservation(classId: str, token: str, date: datetime, logger: Logger) -> str:
     reservationEndpoint = "prenotazione_new/"
+    stringDate = timeanddate.stringFromDateTime(date, constant.INPUT_DATE_FORMAT)
     reservationPayload = {'id_orario_palinsesto': classId, 'id_sede': constant.BOX_ID,
-                      'codice_sessione': token, 'data': timeanddate.stringFromDateTime(date, constant.INPUT_DATE_FORMAT)}
+                      'codice_sessione': token, 'data': stringDate}
     r = requests.post(constant.BASE_URL + reservationEndpoint,
                   data=reservationPayload, headers=constant.HEADERS)
-    return r.json().get('messaggio')
+    outputMessage = r.json().get('messaggio')
+    logger.info(f'classId:{classId} token:{token} date:{stringDate} {outputMessage}')
+    return outputMessage

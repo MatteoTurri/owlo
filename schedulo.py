@@ -6,49 +6,89 @@ import commandbuilder
 import constant
 import os
 import utils
+import asyncio
+import os
+from datetime import datetime
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+import logging
+from datetime import timedelta
 
 parser = argparse.ArgumentParser(
-    description='Schedules a reservation request for a CrossFit Avanguardia class.')
-parser.add_argument('-date', required=True,
-                    help='date of the selected class, format YYYY-MM-DD')
-parser.add_argument('-time', required=True, help='time of the selected class, format HH:MM')
-group = parser.add_mutually_exclusive_group(required=True)
-group.add_argument('-token', nargs='+', help='authentication token(s)')
-group.add_argument('-user', nargs='+', help='user(s) alias(es)')
-parser.add_argument('-path', required=True, help='path of the folder where reservo.py script is')
-parser.add_argument('-scheduledTime', required=True, help='time when the reservation request should be made, format HHMM')
-parser.add_argument('-nReq', required=True, type=int, help='number of per-user request that should be made')
+    description='Schedules reservation requests for CrossFit Avanguardia classes.')
+parser.add_argument('-scheduledDatetime', required=True, help='datetime when requests should be made, format YYYY-mm-dd_HH:MM')
 
 args = parser.parse_args()
-inputDate: str = args.date
-inputTime: str = args.time
-tokens = args.token
-users = args.user
-path: str = args.path
-scheduledTime: str = args.scheduledTime
-nReq: int = args.nReq
+
+scheduledDatetime: str = args.scheduledDatetime
 
 locale.setlocale(locale.LC_ALL, 'it_IT.UTF-8')
 
-parsedDate = timeanddate.parseDateTime(inputDate, constant.INPUT_DATE_FORMAT)
-parsedTime = timeanddate.parseDateTime(inputTime, constant.INPUT_TIME_FORMAT)
-parsedAtTime = timeanddate.parseDateTime(scheduledTime, constant.INPUT_TIME_FORMAT_AT)
-validatedDate = timeanddate.stringFromDateTime(parsedDate, constant.INPUT_DATE_FORMAT)
-validatedScheduledTime = timeanddate.stringFromDateTime(parsedAtTime, constant.INPUT_TIME_FORMAT_AT)
+parsedScheduledDatetime = timeanddate.parseDateTime(scheduledDatetime, constant.INPUT_DATETIME_FORMAT)
 
-if tokens is None:
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', filename='log.log', filemode='a')
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(message)s')
+console.setFormatter(formatter)
+logging.getLogger('').addHandler(console)
+logger = logging.getLogger('reservo')
+
+scheduler = AsyncIOScheduler()
+scheduler.start()
+
+schedule = utils.readSchedule()
+days = schedule.get('schedule')
+
+for d in days:
     data = utils.readData()
     tokens = []
+    users = d.get('users')
+    date = timeanddate.parseDateTime(d.get('day'), constant.INPUT_DATE_FORMAT)
+    time = timeanddate.parseDateTime(d.get('time'), constant.INPUT_TIME_FORMAT)
     for u in users:
         tokens.append(utils.search(data.get('users'), lambda x: x.get('name') == u).get('token'))
+    for t in tokens:
+        print(api.getUsername(t))
+    classId = api.getClassId(tokens[0], date, time)
 
-for t in tokens:
-    print(api.getUsername(t))
+    logger.info(f'Day: {date} - Tokens: {tokens}')
 
-classId = api.getClassId(tokens[0], parsedDate, parsedTime)
+    for t in tokens:
+        logger.info(f'Current token: {t}')
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime - timedelta(seconds=1), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime, args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(seconds=2), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(seconds=4), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(seconds=8), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(seconds=15), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(seconds=30), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(seconds=45), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=1), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(seconds=90), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=2), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=3), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=4), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=5), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=6), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=7), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=8), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=9), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=10), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=11), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=12), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=13), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=14), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=15), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=20), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=25), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=30), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=35), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=40), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=45), args=[classId, t, date, logger])
 
-for t in tokens:
-    for n in range(nReq):
-        command = commandbuilder.buildCommand(classId, t, validatedDate, path, validatedScheduledTime, n)
-        print(command)
-        os.system(command)
+print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
+
+try:
+    asyncio.get_event_loop().run_forever()
+except (KeyboardInterrupt, SystemExit):
+    pass
