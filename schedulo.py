@@ -2,7 +2,6 @@ import locale
 import argparse
 import api
 import timeanddate
-import commandbuilder
 import constant
 import os
 import utils
@@ -33,7 +32,12 @@ console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
 logger = logging.getLogger('reservo')
 
-scheduler = AsyncIOScheduler()
+scheduler = AsyncIOScheduler({
+    'apscheduler.executors.default': {
+        'class': 'apscheduler.executors.pool:ThreadPoolExecutor',
+        'max_workers': '25'
+    }
+})
 scheduler.start()
 
 schedule = utils.readSchedule()
@@ -55,36 +59,36 @@ for d in days:
 
     for t in tokens:
         logger.info(f'Current token: {t}')
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime - timedelta(seconds=1), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime, args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(seconds=2), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(seconds=4), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(seconds=8), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(seconds=15), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(seconds=30), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(seconds=45), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=1), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(seconds=90), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=2), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=3), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=4), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=5), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=6), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=7), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=8), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=9), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=10), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=11), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=12), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=13), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=14), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=15), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=20), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=25), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=30), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=35), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=40), args=[classId, t, date, logger])
-        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=45), args=[classId, t, date, logger])
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime - timedelta(seconds=1), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime, args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(seconds=2), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(seconds=4), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(seconds=8), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(seconds=15), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(seconds=30), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(seconds=45), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=1), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(seconds=90), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=2), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=3), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=4), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=5), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=6), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=7), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=8), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=9), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=10), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=11), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=12), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=13), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=14), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=15), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=20), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=25), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=30), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=35), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=40), args=[classId, t, date, logger], misfire_grace_time=5)
+        scheduler.add_job(api.doReservation, 'date', run_date=parsedScheduledDatetime + timedelta(minutes=45), args=[classId, t, date, logger], misfire_grace_time=5)
 
 print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
 
