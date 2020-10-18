@@ -48,3 +48,13 @@ def doReservation(classId: str, token: str, date: datetime, logger: Logger) -> s
     outputMessage = r.json().get('messaggio')
     logger.info(f'classId:{classId} token:{token} date:{stringDate} {outputMessage}')
     return outputMessage
+
+def doCancelReservation(reservationId: str, token: str, logger: Logger) -> str:
+    cancelReservationEndpoint = "cancella_prenotazione/"
+    cancelReservationPayload = {'id_prenotazione': reservationId, 'id_sede': constant.BOX_ID,
+                      'codice_sessione': token}
+    r = requests.post(constant.BASE_URL + cancelReservationEndpoint,
+                  data=cancelReservationPayload, headers=constant.HEADERS)
+    outputMessage = r.json().get('messaggio')
+    logger.info(f'reservationId:{reservationId} token:{token} {outputMessage}')
+    return outputMessage
