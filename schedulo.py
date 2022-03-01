@@ -13,7 +13,7 @@ import logging
 from datetime import timedelta
 
 parser = argparse.ArgumentParser(
-    description='Schedules reservation requests for CrossFit Avanguardia classes.')
+    description='Schedules reservation requests.')
 parser.add_argument('-scheduledDatetime', required=True, help='datetime when requests should be made, format YYYY-mm-dd_HH:MM')
 
 args = parser.parse_args()
