@@ -3,7 +3,7 @@ import api
 import utils
 
 parser = argparse.ArgumentParser(
-    description='Logs in CrossFit Avanguardia system and returns a token if successful.')
+    description='Logs in the target system and returns a token if successful.')
 parser.add_argument('-email', required=True)
 parser.add_argument('-password', required=True)
 parser.add_argument('-alias', required=True)
